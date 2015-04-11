@@ -1,0 +1,74 @@
+@require(package)
+nuget {
+    #defines {
+    };
+    nuspec {
+        id = @package.id;
+        version : @package.version;
+        title: @package.name;
+        authors: {QtProject};
+        owners: {Max Liebkies};
+        licenseUrl: "https://gnu.org/licenses/gpl.html";
+        projectUrl: "http://qt.io";
+        iconUrl: "http://qt-project.org/images/qt13a/Qt-logo.png";
+        requireLicenseAcceptance:false;
+		summary: "Qt5 binary package for component @package.id";                                          
+        description: "@package.id";                                        
+        releaseNotes: "N/A";  
+        copyright: Copyright 2015;       
+        tags: { qt5, native }; 
+
+    };
+
+    dependencies {
+        packages : {
+		@for dependency in package.dependencies:
+			@{dependency}/@package.version;
+		@end
+        };
+    }
+
+	bin += {
+
+    };
+	
+    files {
+	@for config in package.configurations:
+		[@config.arch,@config.build,dynamic] {
+			bin: {
+				#output {
+					package = default;
+				};
+				#add-each-file : ::nuget.[redist]targets.[${condition}].CopyToOutput;
+				#destination : ${d_bin};
+				
+			@for file in config.binaries:
+				@file.relpath,\
+			@end
+			};
+			lib: {
+			@for file in config.libraries:
+				@file.relpath,\
+			@end
+			};
+			@if config.build == 'debug':
+				symbols: {
+				@for file in config.symbols:
+					@file.relpath,\
+				@end
+				};
+			@end if
+		}
+	@end
+    };
+
+
+    props {
+    }
+
+
+    targets {
+        Defines += HAS_@{package.name};
+    }
+
+}
